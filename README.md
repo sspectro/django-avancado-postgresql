@@ -1239,16 +1239,209 @@ Linux, Visual Studio Code, Docker e PostgreSQL
 
     ---
 
-6. <span style="color:383E42"><b>Definindo os Models</b></span>
+6. <span style="color:383E42"><b>Definindo os Modelos, Funções e Criando Super Usuário</b></span>
     <details><summary><span style="color:Chocolate">Detalhes</span></summary>
     <p>
 
+    - Editado templates - Tradução de alguns textos
+
+    - Função `get_file_path` em `core/models.py`
+        >Cria nome aleatório para o arquivo de imagem feito upload
+        Obs.: StdImageField acrescenta código aleatório a nome de arquivo, caso exista arquivo com mesmo nome. Então não precisariámos da função. Mas a função nos permite mais controle/edição
+        ```python
+        def get_file_path(_instance, filename):
+            # Captura extenção do arquivo
+            ext = filename.split('.')[-1]
+            # Gera um id/código aleatório
+            filename = f'{uuid.uuid4()}.{ext}'
+            return filename
+        ```
+
+    - Model `Base`
+        ```python
+        class Base(models.Model):
+            criados = models.DateField('Criação', auto_now_add=True)
+            modificado = models.DateField('Atualização', auto_now=True)
+            ativo = models.BooleanField('Ativo?', default=True)
+
+            class Meta:
+                abstract = True
+        ```
+
+    - Model `Servico`
+        ```python
+        class Servico(Base):
+            ICONE_CHOICES = (
+                ('lni-cog', 'Engrenagem'),
+                ('lni-stats-up', 'Gráfico'),
+                ('lni-users', 'Usuários'),
+                ('lni-layers', 'Design'),
+                ('lni-mobile', 'Mobile'),
+                ('lni-rocket', 'Foguete'),
+            )
+            servico = models.CharField('Serviço', max_length=100)
+            descricao = models.TextField('Descrição', max_length=200)
+            icone = models.CharField('Icone', max_length=12, choices=ICONE_CHOICES)
+
+            class Meta:
+                verbose_name = 'Serviço'
+                verbose_name_plural = 'Serviços'
+
+            def __str__(self):
+                return self.servico
+        ```
+
+    - Model  `Cargo`
+        ```python
+        class Cargo(Base):
+            cargo = models.CharField('Cargo', max_length=100)
+
+            class Meta:
+                verbose_name = 'Cargo'
+                verbose_name_plural = 'Cargos'
+
+            def __str__(self):
+                return self.cargo
+
+        ```
+    - Model `Funcionario`
+        ```python
+        class Funcionario(Base):
+            nome = models.CharField('Nome', max_length=100)
+            cargo = models.ForeignKey('core.Cargo', verbose_name='Cargo', on_delete=models.CASCADE)
+            bio = models.TextField('Bio', max_length=200)
+            imagem = StdImageField('Imagem', upload_to=get_file_path, variations={'thumb': {'width': 480, 'height': 480, 'crop': True}})
+            facebook = models.CharField('Facebook', max_length=100, default='#')
+            twitter = models.CharField('Twitter', max_length=100, default='#')
+            instagram = models.CharField('Instagram', max_length=100, default='#')
+
+            class Meta:
+                verbose_name = 'Funcionário'
+                verbose_name_plural = 'Funcionários'
+
+            def __str__(self):
+                return self.nome
+        ```
+
+        - Executar `migrations` e `migrate` 
+            >Para criação de arquivo de migração e criação das tabelas no banco
+            ```bash
+            python manage.py makemigrations
+            python manage.py migrate
+            ```
+
+        - Criar super `usuário django`
+            >Informar nome, email e senha
+            ```bash
+            python manage.py createsuperuser
+            ```
+    </p>
+
+    </details> 
+
+    ---
+
+7. <span style="color:383E42"><b>Incluir Modelos ao Painel de Administração e Inserir Dados</b></span>
+    <details><summary><span style="color:Chocolate">Detalhes</span></summary>
+    <p>
+
+    - Em `core/admin.py`
+        ```python
+        from django.contrib import admin
+
+        from .models import Cargo, Servico, Funcionario
+
+
+        @admin.register(Cargo)
+        class CargoAdmin(admin.ModelAdmin):
+            list_display = ('cargo', 'ativo', 'modificado')
+
+
+        @admin.register(Servico)
+        class ServicoAdmin(admin.ModelAdmin):
+            list_display = ('servico', 'icone', 'ativo', 'modificado')
+
+
+        @admin.register(Funcionario)
+        class FuncionarioAdmin(admin.ModelAdmin):
+            list_display = ('nome', 'cargo', 'ativo', 'modificado')
+        ```
+
+    - Cadastrar serviços
+        ```
+        Serviço: Automação Industrial
+        Descrição: Ut maximus enim dolor. Aenean auctor risus eget tincidunt lobortis. Donec tincidunt bibendum gravida.
+        Icone: Engrenagem
+        
+        Serviço: Desing Gráfico
+        Descrição: Ut maximus enim dolor. Aenean auctor risus eget tincidunt lobortis. Donec tincidunt bibendum gravida.
+        Icone: Design
+
+        Serviço: Suporte Humanizado
+        Descrição: Ut maximus enim dolor. Aenean auctor risus eget tincidunt lobortis. Donec tincidunt bibendum gravida.
+        Icone: Usuários
+
+        Serviço: UI/UX DESIGN Criativo
+        Descrição: Ut maximus enim dolor. Aenean auctor risus eget tincidunt lobortis. Donec tincidunt bibendum gravida.
+        Icone: De sign
+
+        Serviço: Desenvolvimento Mobile
+        Descrição: Ut maximus enim dolor. Aenean auctor risus eget tincidunt lobortis. Donec tincidunt bibendum gravida.
+        Icone: Design
+        
+        Serviço: Sistemas Escaláveis
+        Descrição: Ut maximus enim dolor. Aenean auctor risus eget tincidunt lobortis. Donec tincidunt bibendum gravida.
+        Icone: Foguete
+        ```
+
+    - Inserir cargos
+        ```
+        Cargo: Programador Backend
+        Cargo: Designer
+        Cargo: Estagiário
+        ```
+
+    - Inserir Funcionários
+        ```
+        Nome: Paula Fernandes
+        Cargo: Programador Backend
+        Bio: Ut maximus enim dolor. Aenean auctor risus eget tincidunt lobortis. Donec tincidunt bibendum gravida.
+        Imagem: team-04
+
+        Nome: Felipe Silva
+        Cargo: Estagiário
+        Bio: Ut maximus enim dolor. Aenean auctor risus eget tincidunt lobortis. Donec tincidunt bibendum gravida.
+        Imagem: team-04
+
+        Nome: Felicity Jones
+        Cargo: Designer
+        Bio: Ut maximus enim dolor. Aenean auctor risus eget tincidunt lobortis. Donec tincidunt bibendum gravida.
+        Imagem: team-02
+
+        Nome: Cristiano sspectro
+        Cargo: Programador Backend
+        Bio: Ut maximus enim dolor. Aenean auctor risus eget tincidunt lobortis. Donec tincidunt bibendum gravida.
+        Imagem: team-03
+        ```
 
     </p>
 
     </details> 
 
     ---
+
+8. <span style="color:383E42"><b>outros</b></span>
+    <details><summary><span style="color:Chocolate">Detalhes</span></summary>
+    <p>
+    
+    - Inserir
+
+    </p>
+
+    </details> 
+
+    ---
+
 
 ## Meta
 ><span style="color:383E42"><b>Cristiano Mendonça Gueivara</b> </span>
