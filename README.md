@@ -1430,7 +1430,7 @@ Linux, Visual Studio Code, Docker e PostgreSQL
 
     ---
 
-8. <span style="color:383E42"><b>Context Manager Com TemplateView</b></span>
+8. <span style="color:383E42"><b>Context Manager Com TemplateView - Envio de Dados ao Template</b></span>
     <details><summary><span style="color:Chocolate">Detalhes</span></summary>
     <p>
     
@@ -1528,6 +1528,183 @@ Linux, Visual Studio Code, Docker e PostgreSQL
 
     ---
 
+9. <span style="color:383E42"><b>Formulários e Class Based Views</b></span>
+    <details><summary><span style="color:Chocolate">Detalhes</span></summary>
+    <p>
+    - Criar arquivo `core/forms.py` que irá conter os formulários
+
+    - Criar formulário `ContatoForm`
+        ```python
+        from django import forms
+        from django.core.mail.message import EmailMessage
+
+
+        class ContatoForm(forms.Form):
+            nome = forms.CharField(label='Nome', max_length=100)
+            email = forms.EmailField(label='E-mail', max_length=100)
+            assunto = forms.CharField(label='Assunto', max_length=100)
+            mensagem = forms.CharField(label='Mensagem', widget=forms.Textarea())
+
+            def send_mail(self):
+                nome = self.cleaned_data['nome']
+                email = self.cleaned_data['email']
+                assunto = self.cleaned_data['assunto']
+                mensagem = self.cleaned_data['mensagem']
+
+                conteudo = f'Nome: {nome}\nE-mail: {email}\nAssunto: {assunto}\nMensagem: {mensagem}'
+
+                mail = EmailMessage(
+                    subject=assunto,
+                    body=conteudo,
+                    from_email='contato@fusion.com.br',
+                    to=['contato@fusion.com.br',],
+                    headers={'Reply-To': email}
+                )
+                mail.send()  
+        ```
+    
+    - Eição dde `core/views.py`
+        >Inclusão classe `ContatoForm`, configuração para retorno a página `index.html`
+        Incluído validação para o formulário
+        ```python
+        from django.views.generic import FormView
+        from django.urls import reverse_lazy
+        from django.contrib import messages
+
+        from .models import Servico, Funcionario
+        from .forms import ContatoForm
+
+
+        class IndexView(FormView):
+            template_name = 'index.html'
+            form_class = ContatoForm
+            success_url = reverse_lazy('index')
+
+            def get_context_data(self, **kwargs):
+                context = super(IndexView, self).get_context_data(**kwargs)
+                context['servicos'] = Servico.objects.order_by('?').all()
+                context['funcionarios'] = Funcionario.objects.order_by('?').all()
+                return context
+
+            def form_valid(self, form, *args, **kwargs):
+                form.send_mail()
+                messages.success(self.request, 'E-mail enviado com sucesso')
+                return super(IndexView, self).form_valid(form, *args, **kwargs)
+
+            def form_invalid(self, form, *args, **kwargs):
+                messages.error(self.request, 'Erro ao enviar e-mail')
+                return super(IndexView, self).form_invalid(form, *args, **kwargs)
+        ```
+    
+    - Editar template `core/templates/contato.html`
+        >Os valores vindos da view são convertidos/usados nos campos do form
+        ```html
+        {% load static %}
+        <section id="contact" class="section-padding bg-gray">
+            <div class="container">
+                <div class="section-header text-center">
+                <h2 class="section-title wow fadeInDown" data-wow-delay="0.3s">Contate-nos</h2>
+                <div class="shape wow fadeInDown" data-wow-delay="0.3s"></div>
+                </div>
+                <div class="row contact-form-area wow fadeInUp" data-wow-delay="0.3s">
+                <div class="col-lg-7 col-md-12 col-sm-12">
+                    <div class="contact-block">
+                    <form id="contato" method="post" action="{% url 'index' %}" autocomplete="off">
+                        {% csrf_token %}
+                        <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                            <input type="text" class="form-control" id="nome" name="nome" placeholder="Nome" required data-error="Please enter your name">
+                            <div class="help-block with-errors"></div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                            <input type="text" placeholder="E-mail" id="email" class="form-control" name="email" required data-error="Please enter your email">
+                            <div class="help-block with-errors"></div>
+                            </div>
+                        </div>
+                        <div class="col-md-12">
+                            <div class="form-group">
+                            <input type="text" placeholder="Assunto" id="assunto" name="assunto" class="form-control" required data-error="Please enter your subject">
+                            <div class="help-block with-errors"></div>
+                            </div>
+                        </div>
+                        <div class="col-md-12">
+                            <div class="form-group">
+                            <textarea class="form-control" id="mensagem" placeholder="Mensagem" name="mensagem" rows="7" data-error="Write your message" required></textarea>
+                            <div class="help-block with-errors"></div>
+                            </div>
+                            <div class="submit-button text-left">
+                            <button class="btn btn-common" id="form-submit" type="submit">Enviar e-mail</button>
+                            <div id="msgSubmit" class="h3 text-center hidden"></div>
+                            <div class="clearfix"></div>
+                            </div>
+                        </div>
+                        </div>
+                    </form>
+                    </div>
+                </div>
+                <div class="col-lg-5 col-md-12 col-xs-12">
+                    <div class="map">
+                    <object style="border:0; height: 280px; width: 100%;" data="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d34015.943594576835!2d-106.43242624069771!3d31.677719472407432!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x86e75d90e99d597b%3A0x6cd3eb9a9fcd23f1!2sCourtyard+by+Marriott+Ciudad+Juarez!5e0!3m2!1sen!2sbd!4v1533791187584"></object>
+                    </div>
+                </div>
+                </div>
+            </div>
+        </section>
+        ```
+
+    - Incluir código para exibir mensagens no template `core/templates/hero.html`
+        ```html
+        <!-- .... -->
+        <div class="container">
+            {% if messages %}
+            {% for m in messages %}
+                <div class="alert alert-{{ m.tags }}">
+                <button type="button" class="close" data-dismiss="alert"></button>
+                <strong>{{ m }}</strong>
+                </div>
+            {% endfor %}
+            {% endif %}
+        </div>
+        </header>
+        <!-- Header Area wrapper End -->
+        ```
+    
+    - Inclusão de configuração para envio de e-mail em `fusion/settings.py`
+        ```python
+        # Email teste console
+        # EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+
+        """
+        # Email produção
+        EMAIL_HOST = 'localhost'
+        EMAIL_HOST_USER = 'no-reply@seudominio.com.br'
+        EMAIL_PORT = 587
+        EMAIL_USE_TSL = True
+        EMAIL_HOST_PAS########SWORD = 'suasenha'
+        DEFAULT_FROM_EMAIL = 'contato@seudominio.com.br'
+        """
+        ```
+
+    </p>
+
+    </details> 
+
+    ---
+
+10. <span style="color:383E42"><b>Publicando</b></span>
+    <details><summary><span style="color:Chocolate">Detalhes</span></summary>
+    <p>
+
+    >Futuramente incluirei opções de publicação do projeto
+
+    </p>
+
+    </details> 
+
+    ---
 
 ## Meta
 ><span style="color:383E42"><b>Cristiano Mendonça Gueivara</b> </span>
