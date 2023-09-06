@@ -1430,11 +1430,97 @@ Linux, Visual Studio Code, Docker e PostgreSQL
 
     ---
 
-8. <span style="color:383E42"><b>outros</b></span>
+8. <span style="color:383E42"><b>Context Manager Com TemplateView</b></span>
     <details><summary><span style="color:Chocolate">Detalhes</span></summary>
     <p>
     
-    - Inserir
+    - Configurando view `IndexView` para envio de do banco de dados para o template
+        ```python
+        from django.views.generic import TemplateView
+
+        from .models import Servico, Funcionario
+
+        from .models import Servico, Funcionario
+
+        class IndexView(TemplateView):
+            template_name = 'index.html'
+
+            def get_context_data(self, **kwargs):
+                context = super(IndexView, self).get_context_data(**kwargs)
+                context['servicos'] = Servico.objects.order_by('?').all()
+                context['funcionarios'] = Funcionario.objects.order_by('?').all()
+                return context
+        ```
+
+    - Editar template `core/templates/servicos.html`
+        >Recebe dados (do banco de dados) enviados pela view
+        ```html
+        {% load static %}
+        <section id="services" class="section-padding">
+            <div class="container">
+                <div class="section-header text-center">
+                <h2 class="section-title wow fadeInDown" data-wow-delay="0.3s">Nossos Serviços</h2>
+                <div class="shape wow fadeInDown" data-wow-delay="0.3s"></div>
+                </div>
+                <div class="row">
+
+                {% for s in servicos %}
+                <!-- Services item -->
+                <div class="col-md-6 col-lg-4 col-xs-12">
+                    <div class="services-item wow fadeInRight" data-wow-delay="0.3s">
+                    <div class="icon">
+                        <i class="{{ s.icone }}"></i>
+                    </div>
+                    <div class="services-content">
+                        <h3><a href="#">{{ s.servico }}</a></h3>
+                        <p>{{ s.descricao }}</p>
+                    </div>
+                    </div>
+                </div>
+                {% endfor %}
+                </div>
+            </div>
+        </section>
+        ```
+    
+    - Editar template `core/templates/equipe.html` 
+        >Utiliza dados do banco de dados
+        ```html
+        {% load static %}
+        <section id="team" class="section-padding bg-gray">
+            <div class="container">
+                <div class="section-header text-center">
+                <h2 class="section-title wow fadeInDown" data-wow-delay="0.3s">Conheça Nossa Equipe</h2>
+                <div class="shape wow fadeInDown" data-wow-delay="0.3s"></div>
+                </div>
+                <div class="row">
+                {% for f in funcionarios %}
+                <div class="col-lg-6 col-md-12 col-xs-12">
+                    <!-- Team Item Starts -->
+                    <div class="team-item wow fadeInRight" data-wow-delay="0.2s">
+                    <div class="team-img">
+                        <img class="img-fluid" src="{{ f.imagem.thumb.url }}" alt="{{ f.nome }}">
+                    </div>
+                    <div class="contetn">
+                        <div class="info-text">
+                        <h3><a href="#">{{ f.nome }}</a></h3>
+                        <p>{{ f.cargo }}</p>
+                        </div>
+                        <p>{{ f.bio }}</p>
+                        <ul class="social-icons">
+                        <li><a href="{{ f.facebook }}"><i class="lni-facebook-filled" aria-hidden="true"></i></a></li>
+                        <li><a href="{{ f.twitter }}"><i class="lni-twitter-filled" aria-hidden="true"></i></a></li>
+                        <li><a href="{{ f.instagram }}"><i class="lni-instagram-filled" aria-hidden="true"></i></a></li>
+                        </ul>
+                    </div>
+                    </div>
+                    <!-- Team Item Ends -->
+                </div>
+                {% endfor %}
+                </div>
+            </div>
+            </section>
+        ```
 
     </p>
 
