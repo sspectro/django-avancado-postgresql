@@ -1,6 +1,6 @@
 # django-avancado-postgresql
 
->Projeto Django Avançado com Bootstrap e PostgreSQL.
+>Projeto Django Avançado com Bootstrap e PostgreSQL. Inclusão de testes.
 > 
 >>Projeto desenvolvido no curso da Geek University - Udemy [Programação Web com Python e Django Framework: Essencial](https://www.udemy.com/course/programacao-web-com-django-framework-do-basico-ao-avancado/)
 
@@ -10,7 +10,8 @@ Linux, Visual Studio Code, Docker e PostgreSQL
 ## Documentação
 - [DJango](https://www.djangoproject.com/)
 - Dica postgreSQL [vivaolinux](https://www.vivaolinux.com.br/artigo/psql-Conheca-o-basico)
-## Desenvolvimento:
+- Tests [model_mommy](https://model-mommy.readthedocs.io/en/latest/basic_usage.html)
+- Tests [coverage](https://coverage.readthedocs.io/en/7.3.2/)
 1. <span style="color:383E42"><b>Preparando ambiente</b></span>
     <details><summary><span style="color:Chocolate">Detalhes</span></summary>
     <p>
@@ -1690,11 +1691,77 @@ Linux, Visual Studio Code, Docker e PostgreSQL
 
     </p>
 
+    </details>
+    
+    ---
+
+10. <span style="color:383E42"><b>Testando Projeto</b></span>
+    <details><summary><span style="color:Chocolate">Detalhes</span></summary>
+    <p>
+
+    - Remover arquivo `core/tests.py`
+
+    - Instalar o `model_mommy` e `coverage`
+        [Documentação model_mommy](https://model-mommy.readthedocs.io/en/latest/basic_usage.html)
+        [Documentação coverage](https://coverage.readthedocs.io/en/7.3.2/)
+        ```bash
+        pip install model_mommy
+        pip install coverage
+        pip freeze > requirements.txt
+        ```
+    
+    - Criar arquivo `.../django-avancado-postgresql/.coveragerc`
+        `source = .` indica que deve testar tudo que está na raiz. Sem essa indicação testaria as biblitecas na `venv` também.
+        `omit =` indica os aquivos que não precisa testar
+        ```
+        [run]
+        source = .
+
+        omit =
+            */__init__.py
+            */settings.py
+            */manage.py
+            */wsgi.py
+            */apps.py
+            */urls.py
+            */admin.py
+            */migrations.py
+            */tests/*
+        ```
+
+    - Incluir `htmlcov/*` ao `.gitignore` testar comandos `coverage`
+        Esse diretório é criado ao utilizar o coverage - Gera relatório de testes em html.
+        Caso não container postgres não esteja rodando, deve iniciar container primeiro.
+
+        GitIgnore
+        ```gitignore
+        #...
+        htmlcov/*
+
+        ```
+
+        ```bash
+        sudo docker start fusion-postgres
+        coverage run manage.py test
+        coverage html
+        cd htmlcov
+        python -m http.server
+        ```
+
+    - Criar diretório e arquivo `core/tests/test_models.py`
+
+    - Criar arquivo `core/tests/test_forms.py`
+
+    - Criar arquivo `core/tests/test_views.py`
+
+
+    </p>
+
     </details> 
 
     ---
 
-10. <span style="color:383E42"><b>Publicando</b></span>
+11. <span style="color:383E42"><b>Publicando</b></span>
     <details><summary><span style="color:Chocolate">Detalhes</span></summary>
     <p>
 

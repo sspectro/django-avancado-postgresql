@@ -1,8 +1,10 @@
 asgiref==3.7.2
+coverage==7.3.2
 Django==4.2.5
 django-static==1.5.6
 django-stdimage==6.0.1
 gunicorn==21.2.0
+model-mommy==2.0.0
 packaging==23.1
 Pillow==10.0.0
 psycopg2-binary==2.9.7

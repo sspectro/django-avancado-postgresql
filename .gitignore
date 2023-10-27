@@ -286,3 +286,5 @@ pyrightconfig.json
 
 # Dados privados que não devem ir para o repositorio github
 privateData.py
+
+htmlcov/*
