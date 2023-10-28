@@ -1806,8 +1806,71 @@ Linux, Visual Studio Code, Docker e PostgreSQL
         ```
 
     - Criar arquivo `core/tests/test_forms.py`
+        ```python
+        from django.test import TestCase
+
+        from core.forms import ContatoForm
+
+
+        class ContatoFormTestCase(TestCase):
+
+            def setUp(self):
+                self.nome = 'Felicity Jones'
+                self.email = 'felicity@gmail.com'
+                self.assunto = 'Um assunto qualquer'
+                self.mensagem = 'Uma mensagem qualquer'
+
+                self.dados = {
+                    'nome': self.nome,
+                    'email': self.email,
+                    'assunto': self.assunto,
+                    'mensagem': self.mensagem
+                }
+
+                self.form = ContatoForm(data=self.dados)  # ContatoForm(request.POST)
+            # Todo método test começa com a palavra "test_"
+            def test_send_mail(self):
+                form1 = ContatoForm(data=self.dados)
+                form1.is_valid()
+                res1 = form1.send_mail()
+
+                form2 = self.form
+                form2.is_valid()
+                res2 = form2.send_mail()
+
+                self.assertEquals(res1, res2)
+        ```
 
     - Criar arquivo `core/tests/test_views.py`
+        ```python
+        from django.test import TestCase
+        from django.test import Client
+        from django.urls import reverse_lazy
+
+
+        class IndexViewTestCase(TestCase):
+
+            def setUp(self):
+                self.dados = {
+                    'nome': 'Felicity Jones',
+                    'email': 'felicity@gmail.com',
+                    'assunto': 'Meu assunto',
+                    'mensagem': 'Minha mensagem'
+                }
+                self.cliente = Client()
+
+            def test_form_valid(self):
+                request = self.cliente.post(reverse_lazy('index'), data=self.dados)
+                self.assertEquals(request.status_code, 302)
+
+            def test_form_invalid(self):
+                dados = {
+                    'nome': 'Felicity Jones',
+                    'assunto': 'Meu assunto'
+                }
+                request = self.cliente.post(reverse_lazy('index'), data=dados)
+                self.assertEquals(request.status_code, 200)
+        ```
 
 
     </p>
