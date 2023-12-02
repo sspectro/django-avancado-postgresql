@@ -59,7 +59,7 @@ Linux, Visual Studio Code, Docker e PostgreSQL
     <details><summary><span style="color:Chocolate">Detalhes</span></summary>
     <p>
 
-    - [Documentação dockerhub](https://hub.docker.com/_/mysql/tags)
+    - [Documentação dockerhub](https://hub.docker.com/_/postgres)
         - Baixar imagem POSTGRESQL
             ```bash
             docker pull postgres

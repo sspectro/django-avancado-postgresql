@@ -4,7 +4,7 @@ from django.urls import reverse_lazy
 
 
 class IndexViewTestCase(TestCase):
-
+    
     def setUp(self):
         self.dados = {
             'nome': 'Felicity Jones',
