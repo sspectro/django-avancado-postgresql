@@ -12,6 +12,9 @@ Linux, Visual Studio Code, Docker e PostgreSQL
 - Dica postgreSQL [vivaolinux](https://www.vivaolinux.com.br/artigo/psql-Conheca-o-basico)
 - Tests [model_mommy](https://model-mommy.readthedocs.io/en/latest/basic_usage.html)
 - Tests [coverage](https://coverage.readthedocs.io/en/7.3.2/)
+- [Postgres dockerhub](https://hub.docker.com/_/postgres)
+
+
 1. <span style="color:383E42"><b>Preparando ambiente</b></span>
     <details><summary><span style="color:Chocolate">Detalhes</span></summary>
     <p>
